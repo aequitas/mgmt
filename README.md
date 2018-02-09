@@ -27,6 +27,35 @@ Mgmt is a fairly new project. It is usable today, but not yet feature complete.
 With your help you'll be able to influence our design and get us to 1.0 sooner!
 Interested developers should read the [quick start guide](docs/quick-start-guide.md).
 
+## Demo
+
+[![demo!](art/demo.gif)](art/)
+
+The demo above shows a `mgmt` daemon running with the configuration shown below. What can be seen is `mgmt` responding to changes to the system (stopping daemons, deleting files, uninstalling package) and instantly responding to restore the desired state. As well as it responding to other changes (timestamp update) and propagating those changes to resources (file contents).
+
+```
+file "/tmp/mgmt-hello-world" {
+	content => "hello world from @purpleidea\n",
+	state   => "exists",
+}
+
+$d = datetime()
+file "/tmp/mgmt/datetime" {
+	content => template("Hello! It is now: {{ datetimeprint . }}\n", $d),
+}
+
+package 'sl' {
+  state => "exists",
+}
+
+svc 'nginx' {
+  state   => "running",
+  startup => "enabled",
+}
+```
+
+Did you like that? Be sure to check out other (examples)[examples/lang/], Documentation below and (On-the-web)[(docs/on-the-web.md)].
+
 ## Documentation:
 Please read, enjoy and help improve our documentation!
 
@@ -41,6 +70,7 @@ Please read, enjoy and help improve our documentation!
 | [godoc API reference](https://godoc.org/github.com/purpleidea/mgmt) | for mgmt developers |
 | [prometheus guide](docs/prometheus.md) | for everyone |
 | [puppet guide](docs/puppet-guide.md) | for puppet sysadmins |
+| [mgmt vs ...](docs/versus.md) | for everyone |
 
 ## Questions:
 Please ask in the [community](#community)!

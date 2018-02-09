@@ -110,6 +110,7 @@ Before running any of the commands below create the development Docker image:
 
 ```
 docker/scripts/build-development
+```
 
 This image requires updating every time dependencies (`make-deps.sh`) change.
 

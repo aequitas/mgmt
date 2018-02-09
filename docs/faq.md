@@ -62,7 +62,7 @@ equality. In the future it might be helpful or sane to merge the two similar
 comparison functions although for now they are separate because they are
 actually answer different questions.
 
-### Does this support Windows? OSX? GNU Hurd?
+### Does this support Windows? OSX/macOS? GNU Hurd?
 
 Mgmt probably works best on Linux, because that's what most developers use for
 serious automation workloads. Support for non-Linux operating systems isn't a

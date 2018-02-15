@@ -200,6 +200,16 @@ func (obj *Main) Exit(err error) {
 	obj.exit <- err // trigger an exit!
 }
 
+func (obj *Main) CreateTmpPrefix(hostname string, prefix string) error {
+	var err error
+	if prefix, err = ioutil.TempDir("", obj.Program+"-"+hostname+"-"); err != nil {
+		return fmt.Errorf("can't create temporary prefix")
+	}
+	log.Println("Main: Warning: Working prefix directory is temporary!")
+
+	return err
+}
+
 // Run is the main execution entrypoint to run mgmt.
 func (obj *Main) Run() error {
 
@@ -220,19 +230,27 @@ func (obj *Main) Run() error {
 	if p := obj.Prefix; p != nil {
 		prefix = *p
 	}
-	// make sure the working directory prefix exists
-	if obj.TmpPrefix || os.MkdirAll(prefix, 0770) != nil {
-		if obj.TmpPrefix || obj.AllowTmpPrefix {
-			var err error
-			if prefix, err = ioutil.TempDir("", obj.Program+"-"+hostname+"-"); err != nil {
-				return fmt.Errorf("can't create temporary prefix")
-			}
-			log.Println("Main: Warning: Working prefix directory is temporary!")
 
-		} else {
-			return fmt.Errorf("can't create prefix")
+	if obj.TmpPrefix {
+		err := obj.CreateTmpPrefix(prefix, hostname)
+		if err != nil {
+			return fmt.Errorf("can't create tmp-prefix: %s", err)
+		}
+	} else {
+		err := os.MkdirAll(prefix, 0770)
+		if err != nil {
+			if obj.AllowTmpPrefix {
+				err := obj.CreateTmpPrefix(prefix, hostname)
+				if err != nil {
+					return fmt.Errorf("can't create tmp-prefix: %s", err)
+				}
+			} else {
+				return fmt.Errorf("can't create prefix: %s", err)
+			}
 		}
 	}
+	log.Printf("err: %s", err)
+
 	log.Printf("Main: Working prefix is: %s", prefix)
 	pgraphPrefix := fmt.Sprintf("%s/", path.Join(prefix, "pgraph")) // pgraph namespace
 	if err := os.MkdirAll(pgraphPrefix, 0770); err != nil {

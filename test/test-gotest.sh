@@ -20,9 +20,9 @@ base=$(go list .)
 for pkg in `go list ./... | grep -v "^${base}/vendor/" | grep -v "^${base}/examples/" | grep -v "^${base}/test/" | grep -v "^${base}/old/" | grep -v "^${base}/tmp/"`; do
 	echo -e "\ttesting: $pkg"
 	# FIXME: can we capture and output the stderr from these tests too?
-	run-test go test "$pkg" > "$log"
+	run-test go test "$pkg" >> "$log"
 	if [ "$1" = "--race" ]; then
-		run-test go test -race "$pkg" > "$log"
+		run-test go test -race "$pkg" >> "$log"
 	fi
 done
 

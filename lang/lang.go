@@ -70,6 +70,20 @@ type Lang struct {
 	wg        *sync.WaitGroup
 }
 
+// Validate validates if a giving input is syntactically correct
+func (obj *Lang) Validate() error {
+	var err error
+	go func() {
+		err = obj.Init()
+	}()
+	<-obj.loadedChan
+	if err != nil {
+		return err
+	}
+	obj.Close()
+	return nil
+}
+
 // Init initializes the lang struct, and starts up the initial data sources.
 // NOTE: The trick is that we need to get the list of funcs to watch AND start
 // watching them, *before* we pull their values, that way we'll know if they
@@ -99,11 +113,11 @@ func (obj *Lang) Init() error {
 	if err != nil {
 		return errwrap.Wrapf(err, "could not activate an input parser")
 	}
-	if len(output.Workers) > 0 {
-		// either programming error, or someone hacked in something here
-		// by the time *this* parseInput runs, we should be standardized
-		return fmt.Errorf("input contained file system workers")
-	}
+	// if len(output.Workers) > 0 {
+	// 	// either programming error, or someone hacked in something here
+	// 	// by the time *this* parseInput runs, we should be standardized
+	// 	return fmt.Errorf("input contained file system workers")
+	// }
 	reader := bytes.NewReader(output.Main)
 
 	// no need to run recursion detection since this is the beginning

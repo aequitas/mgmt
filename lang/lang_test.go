@@ -1092,3 +1092,60 @@ func TestInterpretMany(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate(t *testing.T) {
+	type test struct { // an individual test
+		name string
+		code string
+		fail bool
+	}
+	testCases := []test{
+		test{
+			name: "valid syntax",
+			code: `
+			$x = 1
+			`,
+			fail: false,
+		},
+		test{
+			name: "should catch lexer/parser errors",
+			code: `
+			$x = 1
+			$x = asdfsadfs
+			`,
+			fail: true,
+		},
+		test{
+			name: "should catch scope errors",
+			code: `
+			$x = 1
+			$x = 2
+			`,
+			fail: true,
+		},
+	}
+
+	logf := func(format string, v ...interface{}) {
+		t.Logf("test: lang: "+format, v...)
+	}
+
+	for index, tc := range testCases { // run all the tests
+		t.Run(fmt.Sprintf("test #%d (%s)", index, tc.name), func(t *testing.T) {
+			lang := &Lang{
+				Fs:    nil,
+				Input: tc.code,           // start path in fs
+				Debug: testing.Verbose(), // set via the -test.v flag to `go test`
+				Logf:  logf,
+			}
+			if err := lang.Validate(); err != nil {
+				if tc.fail == false {
+					t.Errorf("validate failed but should pass: %+v", err)
+				}
+				return
+			}
+			if tc.fail == true {
+				t.Errorf("validate passed but should fail")
+			}
+		})
+	}
+}
